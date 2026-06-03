@@ -1,0 +1,29 @@
+update_statistics:
+  name: "Update PSEG Statistics"
+  description: "Update statistics table with fresh PSEG data using correct timestamps"
+  fields:
+    days_back:
+      name: "Days Back"
+      description: "Number of days of historical data to fetch (0 = latest only, 30 = 1 month backfill)"
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 365
+          step: 1
+
+refresh_cookie:
+  name: "Refresh PSEG Cookie"
+  description: "Manually refresh the PSEG authentication cookie using the addon"
+  fields: {}
+
+enter_mfa_code:
+  name: "Enter PSEG MFA Code"
+  description: "Complete PSEG login by entering the verification code from your email or SMS. Call this after refresh_cookie or scheduled refresh indicates MFA is required."
+  fields:
+    code:
+      required: true
+      example: "123456"
+      selector:
+        text: 
