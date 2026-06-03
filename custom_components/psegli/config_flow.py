@@ -168,7 +168,9 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        # Store config entry on a private attribute to avoid overriding
+        # any read-only property on the base class.
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, str] | None = None
@@ -179,8 +181,8 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             try:
                 # Get credentials from config entry
-                username = self.config_entry.data.get(CONF_USERNAME)
-                password = self.config_entry.data.get(CONF_PASSWORD)
+                username = self._config_entry.data.get(CONF_USERNAME)
+                password = self._config_entry.data.get(CONF_PASSWORD)
                 new_cookie = user_input.get(CONF_COOKIE, "")
                 
                 # If user provided a new cookie, validate it
@@ -208,12 +210,12 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                 elif username and password:
                     _LOGGER.debug("No new cookie provided, attempting to get fresh cookies from addon...")
                     try:
-                        mfa_method = user_input.get(CONF_MFA_METHOD, self.config_entry.data.get(CONF_MFA_METHOD, "sms"))
+                        mfa_method = user_input.get(CONF_MFA_METHOD, self._config_entry.data.get(CONF_MFA_METHOD, "sms"))
                         # Save mfa_method if changed
-                        if mfa_method != self.config_entry.data.get(CONF_MFA_METHOD):
+                        if mfa_method != self._config_entry.data.get(CONF_MFA_METHOD):
                             self.hass.config_entries.async_update_entry(
-                                self.config_entry,
-                                data={**self.config_entry.data, CONF_MFA_METHOD: mfa_method},
+                                self._config_entry,
+                                data={**self._config_entry.data, CONF_MFA_METHOD: mfa_method},
                             )
                         cookies = await get_fresh_cookies(username, password, mfa_method=mfa_method)
                         
@@ -237,8 +239,8 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                             
                             # Update the config entry
                             self.hass.config_entries.async_update_entry(
-                                self.config_entry,
-                                data={**self.config_entry.data, CONF_COOKIE: cookie_string},
+                                self._config_entry,
+                                data={**self._config_entry.data, CONF_COOKIE: cookie_string},
                             )
                             
                             # Clear any persistent notification about expired cookies
@@ -269,7 +271,7 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
             data_schema=self._get_options_schema(),
             errors=errors,
             description_placeholders={
-                "current_cookie": self.config_entry.data.get(CONF_COOKIE, "")[:50] + "..." if self.config_entry.data.get(CONF_COOKIE) else "None"
+                "current_cookie": self._config_entry.data.get(CONF_COOKIE, "")[:50] + "..." if self._config_entry.data.get(CONF_COOKIE) else "None"
             },
         )
 
@@ -289,8 +291,8 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                         client = PSEGLIClient(cookies)
                         await client.test_connection()
                         self.hass.config_entries.async_update_entry(
-                            self.config_entry,
-                            data={**self.config_entry.data, CONF_COOKIE: cookies},
+                            self._config_entry,
+                            data={**self._config_entry.data, CONF_COOKIE: cookies},
                         )
                         await self.hass.services.async_call(
                             "persistent_notification",
