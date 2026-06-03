@@ -193,8 +193,8 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
                     
                     # Update the config entry with the new cookie
                     self.hass.config_entries.async_update_entry(
-                        self.config_entry,
-                        data={**self.config_entry.data, CONF_COOKIE: new_cookie},
+                        self._config_entry,
+                        data={**self._config_entry.data, CONF_COOKIE: new_cookie},
                     )
                     
                     # Clear any persistent notification about expired cookies
@@ -324,7 +324,7 @@ class PSEGLIOptionsFlow(config_entries.OptionsFlow):
             vol.Optional(CONF_COOKIE, description="Leave empty to attempt automatic refresh via addon"): str,
             vol.Optional(
                 CONF_MFA_METHOD,
-                default=self.config_entry.data.get(CONF_MFA_METHOD, "sms"),
+                default=self._config_entry.data.get(CONF_MFA_METHOD, "sms"),
             ): vol.In(["email", "sms"]),
         })
 
